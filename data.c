@@ -1,27 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define MAX_ROW 50
+
 typedef struct user S_user;
 typedef struct list S_list;
 /*ver 1.0.0*/
 
 /*the unit to make user information*/
-struct user{
+struct user {
     unsigned id;
     char nickname[255];
 };
 
 /*the tabel with a posion to user unit, to able information store*/
-struct list{
+struct list {
     unsigned rows;
     unsigned cols;
     S_user *value;
     unsigned id;
-    S_list *right,*down;
+    S_list *right, *down;
     S_list *next;
 };
 
-S_list *head,*nowlist;
+S_list *head, *nowlist;
+unsigned idnow = 0;
 
 void create_list();
 
@@ -33,46 +37,46 @@ void create_list() {
 
     /*to create the 0 row */
 
-    for (n =0; n < 11; n++) {
-        temp = (S_list *)malloc(sizeof(S_list));
+    for (n = 0; n < 11; n++) {
+        temp = (S_list *) malloc(sizeof(S_list));
         if (temp == NULL) {
-            printf("memory error");
+            printf("memory error\n");
             exit(1);
         }
-        if (cols==0) {
+        if (cols == 0) {
             head = temp;
         }
-        if(cols!=0)
-            p1->right=temp;
+        if (cols != 0)
+            p1->right = temp;
         temp->cols = cols;
         temp->rows = rows;
         cols++;
         p1 = temp;
-        temp->down=temp;
+        temp->down = temp;
     }
 
-    cols=0;
-    rows=1;
+    cols = 0;
+    rows = 1;
 
-    p1=head;
-    for (n =1; n < 50; n++) {
+    p1 = head;
+    for (n = 1; n <= MAX_ROW; n++) {
         temp = (S_list *) malloc(sizeof(S_list));
         if (temp == NULL) {
-            printf("memory error");
+            printf("memory error\n");
             exit(1);
         }
 
-        p1->down=temp;
+        p1->down = temp;
         temp->cols = cols;
         temp->rows = rows;
         rows++;
         p1 = temp;
-        temp->right=temp;
+        temp->right = temp;
     }
     printf("list create completely!\n");
 }
 
-void create_user(unsigned id,char name[]) {
+void create_user(unsigned id, char name[]) {
     S_list *temp = NULL, *p1, *p2, *p3;
     S_user *unit = NULL;
     unsigned rows = 1, col;
@@ -84,14 +88,14 @@ void create_user(unsigned id,char name[]) {
     temp = (S_list *) malloc(sizeof(S_list));
 
     if (unit == NULL || temp == NULL) {
-        printf("memory error,0-m;");
+        printf("memory error,0-m\n");
         exit(1);
     }
 
-    if(nowlist!=NULL)
-        temp->next=nowlist;
+    if (nowlist != NULL)
+        temp->next = nowlist;
 
-    nowlist=temp;
+    nowlist = temp;
 
     strcpy(unit->nickname, name);
 
@@ -123,45 +127,47 @@ void create_user(unsigned id,char name[]) {
     temp->down = p3->down;
     p3->down = temp;
     temp->right = p2;
-
+    idnow++;
     printf("user create completely , id : %d,name: %s\n", temp->id, unit->nickname);
 }
 
-S_list *find_id(unsigned id){
-    S_list *p1,*p2;
-    S_user *unit;
-    p1=head;
-    unsigned rows=1,cols=1;
-    while(id>10){
-        id-=10;
+S_list *find_id(unsigned id) {
+    S_list *p1;
+    p1 = head;
+    unsigned rows = 1, cols = 1;
+    while (id > 10) {
+        id -= 10;
         rows++;
     }
-    cols=id;
-    p1=head;
-    while(p1->rows!=rows)
-        p1=p1->down;
-    while(p1->cols!=cols)
+    cols = id;
+    p1 = head;
+    while (p1->rows != rows)
+        p1 = p1->down;
+    while (p1->cols != cols)
         p1 = p1->right;
     /*remember to control the id in specific situation means 0*/
     return p1;
 }
 
-char* get_name(unsigned id){
-    return (find_id(id)->value->nickname);
+char *get_name(unsigned id) {
+    if (id <= idnow)
+        if(find_id(id)->value!=NULL)
+            return (find_id(id)->value->nickname);
+        else
+            return NULL;
 }
 
-void delete_user(unsigned id){
+void delete_user(unsigned id) {
     S_user *unit;
-    unit=(find_id(id)->value);
-    free(unit);
-    find_id(id)->value=NULL;
+    unit = (find_id(id)->value);
+    strcat(unit->id,"(delete)");
 }
 
 /*if no return 0,if have return 1*/
-void change_name_l0(unsigned id,char *str){
-    if(find_id(id)!=NULL) {
+void change_name_l0(unsigned id, char *str) {
+    if (find_id(id) != NULL) {
         strcpy(get_name(id), str);
-        printf("%s",get_name(id));
+        printf("%s", get_name(id));
     } else
-        printf("THERE IS NO such a user.");
+        printf("THERE IS NO such a user.\n");
 }
